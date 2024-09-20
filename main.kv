@@ -1,0 +1,181 @@
+MDScreen:
+
+    MDNavigationLayout:
+
+        MDScreenManager:
+            id: screen_manager
+
+            MDScreen:
+                name: "home"
+
+                BoxLayout:
+                    orientation: 'vertical'
+
+                    MDTopAppBar:
+                        title: "PyWebman"
+                        elevation: 0
+                        pos_hint: {"top": 1}
+                        specific_text_color: app.theme_cls.text_color
+                        md_bg_color: '#FFFFFF'
+                        left_action_items: [["menu", lambda x: nav_drawer.set_state("open")]]
+                        right_action_items: [["magnify", lambda x: app.scan_subnet()],["plus", lambda x: app.add_ps3_dialog()]]
+                    BoxLayout:
+                        orientation: 'vertical'
+
+                        MDBoxLayout:
+                            orientation: 'vertical'
+                            adaptive_height: True
+
+
+                        ScrollView:
+                            MDList:
+                                id: ps_list
+
+            MDScreen:
+                name: "commands"
+
+                BoxLayout:
+                    orientation: 'vertical'
+
+                    MDTopAppBar:
+                        title: "Commands"
+                        elevation: 0
+                        pos_hint: {"top": 1}
+                        md_bg_color: '#FFFFFF'
+                        specific_text_color: app.theme_cls.text_color
+                        left_action_items: [["menu", lambda x: nav_drawer.set_state("open")]]
+
+                    BoxLayout:
+                        orientation: 'vertical'
+                        ScrollView:
+
+                            MDList:
+
+                                TwoLineAvatarListItem:
+                                    text: "Refresh"
+                                    secondary_text: "Refresh Console Content"
+                                    on_release: app.command_refresh()
+
+                                    ImageLeftWidget:
+                                        source: "ps_icon.png"
+
+                                TwoLineAvatarListItem:
+                                    text: "Eject"
+                                    secondary_text: "Eject Disc"
+                                    on_release: app.command_eject()
+
+                                    ImageLeftWidget:
+                                        source: "ps_icon.png"
+
+                                TwoLineAvatarListItem:
+                                    text: "Insert"
+                                    secondary_text: "Insert/Load Disc"
+                                    on_release: app.command_insert()
+
+                                    ImageLeftWidget:
+                                        source: "ps_icon.png"
+
+                                TwoLineAvatarListItem:
+                                    text: "Un-Mount"
+                                    secondary_text: "Unmount Game Image"
+                                    on_release: app.command_unmount()
+
+                                    ImageLeftWidget:
+                                        source: "ps_icon.png"
+
+                                TwoLineAvatarListItem:
+                                    text: "Restart"
+                                    secondary_text: "Restart Console"
+                                    on_release: app.command_restart()
+
+                                    ImageLeftWidget:
+                                        source: "ps_icon.png"
+
+                                TwoLineAvatarListItem:
+                                    text: "Shutdown"
+                                    secondary_text: "Turn Console Off"
+                                    on_release: app.command_shutdown()
+
+                                    ImageLeftWidget:
+                                        source: "ps_icon.png"
+
+
+
+            MDScreen:
+                name: "games"
+
+                BoxLayout:
+                    orientation: 'vertical'
+
+                    MDTopAppBar:
+                        title: "Games"
+                        elevation: 0
+                        pos_hint: {"top": 1}
+                        md_bg_color: '#FFFFFF'
+                        specific_text_color: app.theme_cls.text_color
+                        left_action_items: [["menu", lambda x: nav_drawer.set_state("open")]]
+
+                    BoxLayout:
+                        orientation: 'vertical'
+                        ScrollView:
+                            MDList:
+                                id: game_list
+
+
+
+        MDNavigationDrawer:
+            id: nav_drawer
+            radius: (0, 16, 16, 0)
+
+            MDNavigationDrawerMenu:
+
+                MDNavigationDrawerHeader:
+                    title: "PyWebman"
+                    text: "Not Connected"
+                    id: selected_ps3ip
+                    spacing: "4dp"
+                    padding: "12dp", 0, 0, "56dp"
+
+                MDNavigationDrawerLabel:
+                    text: "Home"
+
+                MDNavigationDrawerItem:
+                    icon: "home"
+                    text: "Console Selection"
+                    on_release: app.switch_screen("home")
+
+                MDNavigationDrawerItem:
+                    icon: "apple-keyboard-command"
+                    text: "Commands"
+                    on_release: app.switch_screen("commands")
+
+                MDNavigationDrawerItem:
+                    icon: "send"
+                    right_text: "+ " + app.game_count
+                    text: "Games"
+                    on_release: app.switch_screen("games")
+
+                MDNavigationDrawerDivider:
+
+                MDNavigationDrawerLabel:
+                    text: "System Info"
+
+                MDNavigationDrawerItem:
+                    icon: "information-outline"
+                    text: ""
+                    id: system_info_webman
+
+                MDNavigationDrawerItem:
+                    icon: "information-outline"
+                    text: ""
+                    id: system_info_mem
+
+                MDNavigationDrawerItem:
+                    icon: "information-outline"
+                    text: ""
+                    id: system_info_hdd
+
+                MDNavigationDrawerItem:
+                    icon: "information-outline"
+                    text: ""
+                    id: system_info_nand
