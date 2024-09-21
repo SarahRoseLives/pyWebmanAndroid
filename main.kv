@@ -1,3 +1,8 @@
+<RemoteButton@Button>:
+    size: dp(100), dp(100)
+    size_hint: (None, None)
+    markup: True
+
 MDScreen:
 
     MDNavigationLayout:
@@ -114,12 +119,121 @@ MDScreen:
                         md_bg_color: '#FFFFFF'
                         specific_text_color: app.theme_cls.text_color
                         left_action_items: [["menu", lambda x: nav_drawer.set_state("open")]]
+                        right_action_items: [["eject", lambda x: app.command_unmount()]]
+
 
                     BoxLayout:
                         orientation: 'vertical'
                         ScrollView:
                             MDList:
                                 id: game_list
+
+            MDScreen:
+                name: "remote"
+
+                BoxLayout:
+                    orientation: 'vertical'
+
+                    MDTopAppBar:
+                        title: "XMB Remote"
+                        elevation: 0
+                        pos_hint: {"top": 1}
+                        md_bg_color: '#FFFFFF'
+                        specific_text_color: app.theme_cls.text_color
+                        left_action_items: [["menu", lambda x: nav_drawer.set_state("open")]]
+
+                    BoxLayout:
+                        orientation: 'vertical'
+                        spacing: dp(10)
+
+                        GridLayout:  # Top buttons
+                            padding: [10, 10, 10, 10]
+                            size_hint_y: 0.15
+                            cols: 3
+                            spacing: dp(10)
+                            Button:
+                                text: '<--'
+                                on_release: app.sendbutton('back')
+                            Button:
+                                text: 'test'
+                                on_release: app.sendbutton('select')
+                            Button:
+                                text: 'Home'
+                                on_release: app.sendbutton('home')
+
+                        AnchorLayout:
+                            anchor_y: 'center'
+                            RelativeLayout:
+                                size_hint: None, None
+                                size: dp(350), dp(350)
+
+                                RemoteButton:
+                                    text: 'Up'
+                                    on_release: app.command_xmb_up()
+                                    pos_hint: {'center_x': 0.5, 'top': 1}
+
+                                RemoteButton:
+                                    text: 'Left'
+                                    on_release: app.command_xmb_left()
+                                    pos_hint: {'x': 0, 'center_y': 0.5}
+
+                                RemoteButton:
+                                    text: 'OK'
+                                    on_release: app.command_xmb_cross()
+                                    pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+
+                                RemoteButton:
+                                    text: 'Right'
+                                    on_release: app.command_xmb_right()
+                                    pos_hint: {'right': 1, 'center_y': 0.5}
+
+                                RemoteButton:
+                                    text: 'Down'
+                                    on_release: app.command_xmb_down()
+                                    pos_hint: {'center_x': 0.5, 'y': 0}
+
+                        GridLayout:  # Bottom buttons
+                            rows: 2
+                            size_hint_y: 0.25
+                            padding: [10, 10, 10, 10]
+                            spacing: dp(10)
+                            Button:
+                                text: '10Sec JumpBack'
+                                on_release: app.sendbutton('replay')
+                            Button:
+                                text: '*'
+                                on_release: app.sendbutton('info')
+                            Button:
+                                text: 'test'
+                            Button:
+                                text: '<<'
+                                on_release: app.sendbutton('reverse')
+                            Button:
+                                text: 'Play/Pause'
+                                on_release: app.sendbutton('play')
+                            Button:
+                                text: '>>'
+                                on_release: app.sendbutton('forward')
+
+
+            MDScreen:
+                name: "cheats"
+
+                BoxLayout:
+                    orientation: 'vertical'
+
+                    MDTopAppBar:
+                        title: "Cheats"
+                        elevation: 0
+                        pos_hint: {"top": 1}
+                        md_bg_color: '#FFFFFF'
+                        specific_text_color: app.theme_cls.text_color
+                        left_action_items: [["menu", lambda x: nav_drawer.set_state("open")]]
+
+                    BoxLayout:
+                        orientation: 'vertical'
+                        ScrollView:
+
 
 
 
@@ -150,10 +264,20 @@ MDScreen:
                     on_release: app.switch_screen("commands")
 
                 MDNavigationDrawerItem:
-                    icon: "send"
-                    right_text: "+ " + app.game_count
+                    icon: "gamepad"
+                    right_text: app.game_count
                     text: "Games"
                     on_release: app.switch_screen("games")
+
+                MDNavigationDrawerItem:
+                    icon: "remote"
+                    text: "XMB Remote"
+                    on_release: app.switch_screen("remote")
+
+                MDNavigationDrawerItem:
+                    icon: "send"
+                    text: "Cheats"
+                    on_release: app.switch_screen("cheats")
 
                 MDNavigationDrawerDivider:
 

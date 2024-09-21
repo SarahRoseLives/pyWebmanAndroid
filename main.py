@@ -251,7 +251,7 @@ class PyWebman(MDApp):
             # Clear the game list before populating
             self.root.ids.game_list.clear_widgets()
 
-            self.game_count = str(len(games))
+            self.game_count = "+ " + str(len(games))
 
             for game in games:
                 # Extract the mount link (anchor tag within the div)
@@ -321,5 +321,21 @@ class PyWebman(MDApp):
     def command_shutdown(self):
         self.webman('shutdown.ps3')
 
+    ## XMB Remote Commands ##
+
+    def command_xmb_up(self):
+        self.webman('/pad.ps3?up')
+
+    def command_xmb_down(self):
+        self.webman('/pad.ps3?down')
+
+    def command_xmb_left(self):
+        self.webman('/pad.ps3?left')
+
+    def command_xmb_right(self):
+        self.webman('/pad.ps3?right')
+
+    def command_xmb_cross(self):
+        self.webman('/pad.ps3?cross')
 
 PyWebman().run()
