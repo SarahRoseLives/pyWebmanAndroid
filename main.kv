@@ -210,6 +210,8 @@ MDScreen:
             MDScreen:
                 name: "artemis"
 
+                on_enter: app.get_current_game()
+
                 BoxLayout:
                     orientation: 'vertical'
 
@@ -221,11 +223,22 @@ MDScreen:
                         specific_text_color: app.theme_cls.text_color
                         left_action_items: [["menu", lambda x: nav_drawer.set_state("open")]]
 
+                        # Adding another right action item
+                        right_action_items: [["attachment", lambda x: app.command_artemis_attach()],["refresh", lambda x: app.get_current_game()]]
+
                     BoxLayout:
                         orientation: 'vertical'
+
+                        MDLabel:
+                            text: "No Game Running"
+                            id: running_game
+                            halign: 'center'
+                            size_hint_y: None
+                            height: self.texture_size[1] + dp(10)
+
                         MDTextField:
                             id: search_field
-                            hint_text: "Enter game or cheat name"
+                            hint_text: "Enter Game Name or Code"
                             size_hint_x: 0.8
                             pos_hint: {"center_x": 0.5}
 

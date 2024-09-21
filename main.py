@@ -86,9 +86,9 @@ class PyWebman(MDApp):
         if not self.dialog:
             self.dialog = MDDialog(
                 title="Artemis Codes",
-                text=content[:500],  # Limiting content length for dialog
+                text=content[:200],  # Limiting content length for dialog
                 size_hint=(0.9, 1),
-                auto_dismiss=False,  # Prevent auto-dismiss on touch outside the dialog
+                auto_dismiss=True,
                 buttons=[
                     MDFlatButton(
                         text="Close",
@@ -101,7 +101,7 @@ class PyWebman(MDApp):
                 ],
             )
         else:
-            self.dialog.text = content[:1000]
+            self.dialog.text = content[:200]
 
         self.dialog.open()
 
@@ -144,7 +144,31 @@ class PyWebman(MDApp):
     def on_ps3_send_failure(self, req, result):
         print(f"Failed to send data to the PS3: {result}")
 
+    def get_current_game(self):
+        try:
+            response = requests.get(f'http://{PS3IP}/artemis.ps3')
+
+            # Parse the HTML with BeautifulSoup
+            soup = BeautifulSoup(response.text, 'html.parser')
+
+            # Find the relevant H2 tag which contains the game title and version
+            game_info = soup.find('h2')
+
+            # Extract and print the current game if it exists
+            if game_info:
+                game_text = game_info.get_text(strip=True)
+                print(f"Current game is: {game_text}")
+                self.root.ids.running_game.text = game_text
+            else:
+                self.root.ids.running_game.text = "No Game Running, Maybe Refresh?"
+                print("No current game found.")
+        except:
+            pass
+
     ### END Artemis Search
+
+
+
 
 
     def build(self):
@@ -500,5 +524,7 @@ class PyWebman(MDApp):
         # Dismiss the dialog after the message is sent
         self.dialog.dismiss()
 
+    def command_artemis_attach(self):
+        self.webman('/artemis.ps3?attach')
 
 PyWebman().run()
