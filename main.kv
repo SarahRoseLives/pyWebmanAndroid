@@ -56,6 +56,9 @@ MDScreen:
 
                             MDList:
 
+                                OneLineListItem:
+                                    text: "Primary Commands"
+
                                 TwoLineAvatarListItem:
                                     text: "Refresh"
                                     secondary_text: "Refresh Console Content"
@@ -100,6 +103,17 @@ MDScreen:
                                     text: "Shutdown"
                                     secondary_text: "Turn Console Off"
                                     on_release: app.command_shutdown()
+
+                                    ImageLeftWidget:
+                                        source: "ps_icon.png"
+
+                                OneLineListItem:
+                                    text: "Other Useful Commands"
+
+                                TwoLineAvatarListItem:
+                                    text: "Send Notification"
+                                    secondary_text: "Send a chat message to console"
+                                    on_release: app.command_sendmessage()
 
                                     ImageLeftWidget:
                                         source: "ps_icon.png"
@@ -152,14 +166,14 @@ MDScreen:
                             cols: 3
                             spacing: dp(10)
                             Button:
-                                text: '<--'
-                                on_release: app.sendbutton('back')
+                                text: 'Insert Disc'
+                                on_release: app.command_insert()
                             Button:
-                                text: 'test'
-                                on_release: app.sendbutton('select')
+                                text: 'Eject Disc'
+                                on_release: app.command_eject()
                             Button:
-                                text: 'Home'
-                                on_release: app.sendbutton('home')
+                                text: 'Un-Mount'
+                                on_release: app.command_unmount()
 
                         AnchorLayout:
                             anchor_y: 'center'
@@ -192,38 +206,15 @@ MDScreen:
                                     on_release: app.command_xmb_down()
                                     pos_hint: {'center_x': 0.5, 'y': 0}
 
-                        GridLayout:  # Bottom buttons
-                            rows: 2
-                            size_hint_y: 0.25
-                            padding: [10, 10, 10, 10]
-                            spacing: dp(10)
-                            Button:
-                                text: '10Sec JumpBack'
-                                on_release: app.sendbutton('replay')
-                            Button:
-                                text: '*'
-                                on_release: app.sendbutton('info')
-                            Button:
-                                text: 'test'
-                            Button:
-                                text: '<<'
-                                on_release: app.sendbutton('reverse')
-                            Button:
-                                text: 'Play/Pause'
-                                on_release: app.sendbutton('play')
-                            Button:
-                                text: '>>'
-                                on_release: app.sendbutton('forward')
-
 
             MDScreen:
-                name: "cheats"
+                name: "artemis"
 
                 BoxLayout:
                     orientation: 'vertical'
 
                     MDTopAppBar:
-                        title: "Cheats"
+                        title: "Artemis"
                         elevation: 0
                         pos_hint: {"top": 1}
                         md_bg_color: '#FFFFFF'
@@ -232,7 +223,21 @@ MDScreen:
 
                     BoxLayout:
                         orientation: 'vertical'
+                        MDTextField:
+                            id: search_field
+                            hint_text: "Enter game or cheat name"
+                            size_hint_x: 0.8
+                            pos_hint: {"center_x": 0.5}
+
+                        MDRaisedButton:
+                            text: "Search"
+                            size_hint_x: 0.3
+                            pos_hint: {"center_x": 0.5}
+                            on_release: app.perform_search()
+
                         ScrollView:
+                            MDList:
+                                id: cheat_list
 
 
 
@@ -275,9 +280,9 @@ MDScreen:
                     on_release: app.switch_screen("remote")
 
                 MDNavigationDrawerItem:
-                    icon: "send"
-                    text: "Cheats"
-                    on_release: app.switch_screen("cheats")
+                    icon: "memory"
+                    text: "Artemis"
+                    on_release: app.switch_screen("artemis")
 
                 MDNavigationDrawerDivider:
 

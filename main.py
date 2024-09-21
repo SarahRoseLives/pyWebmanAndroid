@@ -9,11 +9,14 @@ from kivymd.app import MDApp
 from kivymd.uix.list import TwoLineListItem
 from kivy.clock import mainthread
 import re
-from kivymd.uix.dialog import MDDialog
 from kivymd.uix.button import MDFlatButton
 from kivymd.uix.textfield import MDTextField
-from kivymd.uix.list import TwoLineAvatarListItem, ImageLeftWidget
+from kivymd.uix.list import OneLineListItem, TwoLineAvatarListItem, ImageLeftWidget
 from kivy.properties import StringProperty
+from kivymd.uix.dialog import MDDialog
+from kivy.network.urlrequest import UrlRequest
+import urllib.parse
+
 
 
 # Global variable to store selected PlayStation IP
@@ -22,6 +25,126 @@ PS3IP = None
 
 class PyWebman(MDApp):
     game_count = StringProperty('')
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.dialog = None
+
+    ### Artemis Search
+
+    def perform_search(self):
+        search_query = self.root.ids.search_field.text.strip().lower()
+        if not search_query:
+            print("Please enter a search term.")
+            return
+
+        # Use the renamed attribute _directory here
+        url = f'https://api.github.com/repos/bucanero/ArtemisPS3/contents/docs/codes'
+
+        headers = {
+            'User-Agent': 'PyWebman/1.0'
+        }
+
+        UrlRequest(url, self.on_success, on_error=self.on_error, on_failure=self.on_failure, req_headers=headers)
+
+    def on_success(self, req, result):
+        search_query = self.root.ids.search_field.text.strip().lower()
+        print(f"Request succeeded. Searching for: {search_query}")
+
+        try:
+            cheat_list = self.root.ids.cheat_list
+            cheat_list.clear_widgets()  # Clear the previous search results
+
+            for item in result:
+                if item['name'].endswith('.ncl') and search_query in item['name'].lower():
+                    # Pass item correctly using a default argument in lambda
+                    list_item = OneLineListItem(text=item['name'],
+                                                on_release=lambda x, item=item: self.display_file_content(item))
+                    cheat_list.add_widget(list_item)
+
+            if not cheat_list.children:
+                print(f"No files matching '{search_query}' found.")
+
+        except Exception as e:
+            print(f"Error while processing data: {e}")
+
+    def on_error(self, req, error):
+        print(f"Request error: {error}")
+        print(f"Response status code: {req.resp_status}")
+        print(f"Response body: {req.result}")
+
+    def on_failure(self, req, result):
+        print(f"Request failed!")
+        print(f"Response status code: {req.resp_status}")
+        print(f"Response body: {req.result}")
+
+    def display_file_content(self, item):
+        download_url = item['download_url']
+        UrlRequest(download_url, self.show_content, on_error=self.on_error, on_failure=self.on_failure)
+
+    def show_content(self, req, content):
+        if not self.dialog:
+            self.dialog = MDDialog(
+                title="Artemis Codes",
+                text=content[:500],  # Limiting content length for dialog
+                size_hint=(0.9, 1),
+                auto_dismiss=False,  # Prevent auto-dismiss on touch outside the dialog
+                buttons=[
+                    MDFlatButton(
+                        text="Close",
+                        on_release=lambda x: self.dialog.dismiss()
+                    ),
+                    MDFlatButton(
+                        text="Send to PS3",
+                        on_release=lambda x: (self.send_to_ps3(content), self.dialog.dismiss())
+                    ),
+                ],
+            )
+        else:
+            self.dialog.text = content[:1000]
+
+        self.dialog.open()
+
+    def format_to_url_encoded(self, data):
+        # URL encode the input data
+        encoded_data = urllib.parse.quote(data)
+        return encoded_data
+
+    def send_to_ps3(self, *args):
+        # Get the content from the dialog
+        data = self.dialog.text
+
+        # URL encode the dialog content
+        encoded_data = self.format_to_url_encoded(data)
+
+        # Your base URL (replace with your actual PS3 IP or hostname)
+        base_url = f"http://{PS3IP}/artemis.ps3/dev_hdd0/tmp/art.txt&t="
+
+        # Combine the base URL with the encoded data
+        final_url = base_url + encoded_data
+
+        # Send the request to the PS3 (this assumes your PS3 can handle this GET request)
+        UrlRequest(final_url, on_success=self.on_ps3_send_success, on_error=self.on_ps3_send_error,
+                   on_failure=self.on_ps3_send_failure)
+
+
+
+        # Output the final URL for debugging
+        print("Encoded URL:\n", final_url)
+
+    def on_ps3_send_success(self, req, result):
+        UrlRequest(f'http{PS3IP}/artemis.ps3?attach')  # attach after sending codes
+        self.open_dialog(title='Success', text='Artemis Codes Attached')
+        print("Data successfully sent to the PS3.")
+
+
+    def on_ps3_send_error(self, req, error):
+        print(f"Error sending data to the PS3: {error}")
+
+    def on_ps3_send_failure(self, req, result):
+        print(f"Failed to send data to the PS3: {result}")
+
+    ### END Artemis Search
 
 
     def build(self):
@@ -180,7 +303,7 @@ class PyWebman(MDApp):
         self.root.ids.selected_ps3ip.text = str(PS3IP)
         self.get_info(PS3IP)
         self.get_games()
-        self.webman('popup.ps3/Connected to PyWebman&snd=0')
+        self.webman('popup.ps3/Connected to PyWebman&snd=8')
         print(f"Selected PlayStation IP: {PS3IP}")
 
     def get_info(self, ip):
@@ -337,5 +460,45 @@ class PyWebman(MDApp):
 
     def command_xmb_cross(self):
         self.webman('/pad.ps3?cross')
+
+    def command_sendmessage(self):
+        """ Opens a dialog to input and send a message to the PS3. """
+        if not self.dialog:
+            self.dialog = MDDialog(
+                title="Enter your message:",
+                type="custom",
+                content_cls=MDTextField(
+                    hint_text="Message",
+                    id="message_field",  # Assign ID to the text field for later reference
+                ),
+                buttons=[
+                    MDFlatButton(
+                        text="CANCEL", on_release=lambda x: self.dialog.dismiss()
+                    ),
+                    MDFlatButton(
+                        text="OK", on_release=lambda x: self.send_message()
+                    ),
+                ],
+            )
+        self.dialog.open()
+
+    def send_message(self):
+        """ Sends the message input to the PS3. """
+        # Retrieve the message from the input field in the dialog
+        message_field = self.dialog.content_cls
+        message = message_field.text.strip()
+
+        if message:
+            try:
+                requests.get(f'http://{PS3IP}/popup.ps3/{message}')
+                self.open_dialog(title="Success", text="Message sent successfully!")
+            except requests.exceptions.RequestException:
+                self.open_dialog(title="ERROR", text="Failed to send the message.")
+        else:
+            self.open_dialog(title="Invalid Input", text="Please enter a message.")
+
+        # Dismiss the dialog after the message is sent
+        self.dialog.dismiss()
+
 
 PyWebman().run()
